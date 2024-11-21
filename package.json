@@ -2,7 +2,7 @@
   "name": "codeclip-backend",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,5 +16,9 @@
   ],
   "author": "Dhiraj Arya",
   "license": "ISC",
-  "description": "Backend for the ClipCode project, a code snippet manager built using the MERN stack."
+  "description": "Backend for the ClipCode project, a code snippet manager built using the MERN stack.",
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "prettier": "^3.3.3"
+  }
 }
