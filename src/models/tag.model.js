@@ -13,7 +13,7 @@ const tagColors = Object.freeze([
   { name: 'pinkRose', color: '#E83E8C' },
 ]);
 
-const tag = mongoose.Schema({
+const tagSchema = mongoose.Schema({
   tagName: {
     type: String,
     required: true,
@@ -34,4 +34,4 @@ const tag = mongoose.Schema({
   },
 });
 
-export const Tag = mongoose.model('Tag', tag);
+export const Tag = mongoose.model('Tag', tagSchema);
