@@ -41,25 +41,15 @@ const userSchema = mongoose.Schema(
       //user set status
       type: String,
     },
-    score: {
-      type: Number,
-      default: 0,
-      required: true,
-    },
     refreshToken: {
       type: String,
-      required: true,
     },
-    accessToken: {
-      type: String,
-      required: true,
-    },
-    knowLanguages: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: 'Language',
-      },
-    ],
+    // knowLanguages: [
+    //   {
+    //     type: mongoose.Types.ObjectId,
+    //     ref: 'Language',
+    //   },
+    // ],
   },
   { timestamps: true }
 );
@@ -72,12 +62,12 @@ userSchema.pre("save", async function (next) {
 });
 
 //create custom method to check password is right or not  
-userSchema.model.isPasswordCorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 }
 
 // custom method to generate secure token for user 
-userSchema.model.generateAccessToken = async () => {
+userSchema.methods.generateAccessToken = async () => {
   return jwt.sign({
     _id: this._id,
     fullName: this.password,
@@ -90,7 +80,7 @@ userSchema.model.generateAccessToken = async () => {
     })
 };
 
-userSchema.model.generateRefreshToken = async () => {
+userSchema.methods.generateRefreshToken = async () => {
   return jwt.sign({
     _id: this._id
   },
