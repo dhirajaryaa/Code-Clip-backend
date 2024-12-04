@@ -67,10 +67,9 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 // custom method to generate secure token for user 
-userSchema.methods.generateAccessToken = async () => {
-  return jwt.sign({
-    _id: this._id,
-    fullName: this.password,
+userSchema.methods.generateAccessToken = async function () {
+  return await jwt.sign({
+    id: this._id,
     username: this.username,
     email: this.email
   },
@@ -80,8 +79,8 @@ userSchema.methods.generateAccessToken = async () => {
     })
 };
 
-userSchema.methods.generateRefreshToken = async () => {
-  return jwt.sign({
+userSchema.methods.generateRefreshToken = async function () {
+  return await jwt.sign({
     _id: this._id
   },
     process.env.REFRESH_TOKEN_SECRET,
