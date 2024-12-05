@@ -159,7 +159,7 @@ const refreshAccessToken = AsyncHandler(async (req, res) => {
     // get cookies from req 
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
     if (!incomingRefreshToken) {
-        throw new ApiError(403, "UnAuthorized Access")
+        throw new ApiError(401, "UnAuthorized Access")
     };
     // decode cookies and get userid 
     const decodedToken = await jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
@@ -176,15 +176,26 @@ const refreshAccessToken = AsyncHandler(async (req, res) => {
     await currentUser.save({ validateBeforeSave: false });
     // return response with cookies 
     return res
-        .status(200)
+        .status(201)
         .cookie("accessToken", accessToken, cookieOptions)
         .cookie("refreshToken", refreshToken, cookieOptions)
         .json(
-            new ApiResponse(200, {
+            new ApiResponse(201, {
                 accessToken,
                 refreshToken
             }, "Token Refresh Successfully")
         )
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+// get current user 
+const currentUser = AsyncHandler(async (req, res) => {
+    // get data from req and return
+    return res
+            .status(200)
+            .json(
+                new ApiResponse(200,req?.user,"Current User data fetched!")
+            )
+
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, currentUser };
