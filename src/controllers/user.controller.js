@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js"
 import { uploadFileOnCloudinary } from "../services/cloudinary.service.js"
+import jwt from "jsonwebtoken";
 
 // generate Access token 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -137,7 +138,7 @@ const loginUser = AsyncHandler(async (req, res) => {
 const logoutUser = AsyncHandler(async (req, res) => {
 
     //  update refresh token on user object 
-    const updatedData = await User.findByIdAndUpdate(req?.user?._id, {
+    await User.findByIdAndUpdate(req?.user?._id, {
         $set: { refreshToken: undefined }
     },
         {
@@ -151,6 +152,39 @@ const logoutUser = AsyncHandler(async (req, res) => {
         .json(
             new ApiResponse(200, {}, "Logout successful!")
         )
-})
+});
 
-export { registerUser, loginUser, logoutUser };
+// refresh Access Token 
+const refreshAccessToken = AsyncHandler(async (req, res) => {
+    // get cookies from req 
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    if (!incomingRefreshToken) {
+        throw new ApiError(403, "UnAuthorized Access")
+    };
+    // decode cookies and get userid 
+    const decodedToken = await jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+    if (!decodedToken) {
+        throw new ApiError(401, "Invalid Token");
+    };
+    // fetch user data using id 
+    //? by default sensitive data not selected on using select method to select +dataName
+    const currentUser = await User.findById(decodedToken?._id).select("+refreshToken");
+    // new generate token
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(currentUser._id);
+    // update refresh token on user collection 
+    currentUser.refreshToken = refreshToken
+    await currentUser.save({ validateBeforeSave: false });
+    // return response with cookies 
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json(
+            new ApiResponse(200, {
+                accessToken,
+                refreshToken
+            }, "Token Refresh Successfully")
+        )
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
