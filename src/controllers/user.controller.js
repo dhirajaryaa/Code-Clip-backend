@@ -191,11 +191,42 @@ const refreshAccessToken = AsyncHandler(async (req, res) => {
 const currentUser = AsyncHandler(async (req, res) => {
     // get data from req and return
     return res
-            .status(200)
-            .json(
-                new ApiResponse(200,req?.user,"Current User data fetched!")
-            )
+        .status(200)
+        .json(
+            new ApiResponse(200, req?.user, "Current User data fetched!")
+        )
 
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken, currentUser };
+// change password 
+const updatePassword = AsyncHandler(async (req, res) => {
+    // get data from req.body 
+    const { oldPassword, newPassword } = req.body;
+    // check data empty or null 
+    if (!(oldPassword && newPassword)) {
+        throw new ApiError(400, "All Fields are Required");
+    };
+    // password match 
+    const currentUser = await User.findById(req.user._id);
+    const isPasswordCorrect = await currentUser.isPasswordCorrect(oldPassword);
+    if (!isPasswordCorrect) {
+        throw new ApiError(401, "Password not matched!");
+    };
+    // update password 
+    // remove password and refresh token form response 
+    const updatedUser = await User.findByIdAndUpdate(currentUser?._id, {
+        $set: {
+            password: newPassword
+        }
+    }, {
+        new: true
+    }).select("-password -refreshToken");
+    // return res 
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(201, updatedUser, "Password updated successfully!")
+        )
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, currentUser, updatePassword };
