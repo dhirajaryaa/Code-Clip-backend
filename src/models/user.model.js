@@ -69,7 +69,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 // custom method to generate secure token for user 
 userSchema.methods.generateAccessToken = async function () {
   return await jwt.sign({
-    id: this._id,
+    _id: this._id,
     username: this.username,
     email: this.email
   },
