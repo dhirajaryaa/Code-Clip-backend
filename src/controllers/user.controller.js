@@ -217,12 +217,11 @@ const updatePassword = AsyncHandler(async (req, res) => {
     // remove password and refresh token form response 
     currentUser.password = newPassword;
     await currentUser.save({ validateBeforeSave: false });
-    const updatedUser = await User.findById(currentUser._id).select("-password -refreshToken");
     // return res 
     return res
         .status(201)
         .json(
-            new ApiResponse(201, updatedUser, "Password updated successfully!")
+            new ApiResponse(201, {}, "Password updated successfully!")
         )
 });
 
