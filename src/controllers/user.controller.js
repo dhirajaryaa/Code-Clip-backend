@@ -112,6 +112,7 @@ const loginUser = AsyncHandler(async (req, res) => {
     }
     // check password correct or not 
     const isPasswordValid = await existsUser.isPasswordCorrect(password);
+
     if (!isPasswordValid) {
         throw new ApiError(401, "password not correct ");
     }
@@ -214,13 +215,9 @@ const updatePassword = AsyncHandler(async (req, res) => {
     };
     // update password 
     // remove password and refresh token form response 
-    const updatedUser = await User.findByIdAndUpdate(currentUser?._id, {
-        $set: {
-            password: newPassword
-        }
-    }, {
-        new: true
-    }).select("-password -refreshToken");
+    currentUser.password = newPassword;
+    await currentUser.save({ validateBeforeSave: false });
+    const updatedUser = await User.findById(currentUser._id).select("-password -refreshToken");
     // return res 
     return res
         .status(201)
